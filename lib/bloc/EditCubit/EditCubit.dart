@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:task/bloc/EditCubit/EditState.dart';
-import 'package:task/models/post_model.dart';
+import 'package:task/models/product_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:task/utils/common.dart';
 import 'package:http/http.dart' as http;

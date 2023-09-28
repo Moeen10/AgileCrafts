@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:task/bloc/PostsCubit/state_cubit.dart';
-import 'package:task/models/post_model.dart';
+import 'package:task/models/product_model.dart';
 import 'package:task/repository/getRepository/post_repository.dart';
 import 'package:task/utils/common.dart';
 import 'dart:convert';

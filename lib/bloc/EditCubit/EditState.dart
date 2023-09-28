@@ -1,4 +1,4 @@
-import 'package:task/models/post_model.dart';
+import 'package:task/models/product_model.dart';
 
 abstract class EditState {}
 

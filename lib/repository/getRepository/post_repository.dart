@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:task/models/post_model.dart';
+import 'package:task/models/product_model.dart';
 import 'package:task/utils/common.dart';
 
 class PostRepository {

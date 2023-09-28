@@ -1,18 +1,17 @@
+import 'package:hive/hive.dart';
 import 'package:task/bloc/AddCubit/AddCubit.dart';
 import 'package:task/bloc/AddCubit/AddState.dart';
 import 'package:task/bloc/EditCubit/EditCubit.dart';
 import 'package:task/bloc/EditCubit/EditState.dart';
 import 'package:task/bloc/InternetCubit/InternetCubit.dart';
 import 'package:task/bloc/InternetCubit/InternetState.dart';
-
 import 'package:task/bloc/PostsCubit/post_Cubit.dart';
 import 'package:task/bloc/PostsCubit/state_cubit.dart';
-import 'package:task/models/post_model.dart';
-import 'package:task/screens/test.dart';
+import 'package:task/models/product_model.dart';
 import 'package:task/utils/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get/get.dart';
+import "package:hive_flutter/hive_flutter.dart";
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -57,13 +56,90 @@ class _HomeState extends State<Home> {
                     },
                     child: Text("ADD"),
                   ),
+
+
+
+
+
+
+
+
+
+
+
+
+
                   Expanded(
                     child: BlocBuilder<PostCubit, PostState>(
                       builder: (context, state) {
                         if (state is GetDataState) {
-                          return ListView.builder(
+
+
+
+
+                          // print("&&&&&&&&&&&&&&&&&&");
+                          // print( state.posts[index].id);
+                          // final data = Product(description: state.posts[index].description,id: state.posts[index].id,isAvailable: state.posts[index].isAvailable,name: state.posts[index].name,tenantId:state.posts[index].tenantId );
+                          // final box = Boxes.getData();
+                          // box.add(data);
+                          // data.save();
+
+                          // print(box.values.first.id);
+                          List<Product> productList = [];
+                          for(Product i in  state.posts ){
+
+                            productList.add(Product(
+                              description: i.description,
+                              id: i.id,
+                              isAvailable: i.isAvailable,
+                              name: i.name,
+                              tenantId: i.tenantId,
+                            ));
+                          }
+
+                          final box = Boxes.getData();
+                          box.addAll(productList);
+
+                          if (box.length >= 5) {
+                            print("????????????     ${box.length}      ////////////////////////");
+                          ;
+                            // Add other properties as needed
+                          }
+
+                          return ValueListenableBuilder<Box<Product>>(
+                              valueListenable: Boxes.getData().listenable(),
+                              builder: (context,box,_){
+                                var data = box.values.toList().cast<Product>();
+
+
+
+
+                                return ListView.builder(
+                                  itemCount: box.length,
+                                  itemBuilder: (context, index) {
+                                  return    ListTile(
+                                    title: Text(data[index].name.toString()),
+                                    leading: Text(data[index].id.toString()),
+                                    trailing: IconButton(
+                                      onPressed: () {
+                                        Product singleProduct = state.posts[index];
+                                        edit = !edit;
+                                        BlocProvider.of<EditCubit>(context)
+                                            .editPermission(edit, singleProduct);
+                                      },
+                                      icon: Icon(Icons.edit),
+                                    ),
+                                  );
+                                },);
+                              }
+                          );
+
+
+                            ListView.builder(
                             itemCount: state.posts.length,
+
                             itemBuilder: (context, index) {
+
                               return ListTile(
                                 title: Text(state.posts[index].name.toString()),
                                 leading: Text(state.posts[index].id.toString()),
@@ -79,6 +155,9 @@ class _HomeState extends State<Home> {
                               );
                             },
                           );
+
+
+
                         } else if (state is LoadingState) {
                           return Center(
                             child: CircularProgressIndicator(),
@@ -89,6 +168,21 @@ class _HomeState extends State<Home> {
                       },
                     ),
                   ),
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
                 BlocConsumer<EditCubit,EditState>(builder: (context, state) {
@@ -322,10 +416,28 @@ class _HomeState extends State<Home> {
       ),
     );
   }
+
+
+  Future<void> _showDialog()async{
+    return showDialog(
+        context: context,
+        builder: (context){
+          return AlertDialog(
+            title:Text("Add Products"),
+          );
+        }
+    );
+  }
+
 }
 
 
 
 
+
+
+class Boxes {
+  static Box<Product> getData() => Hive.box<Product>("products");
+}
 
 
