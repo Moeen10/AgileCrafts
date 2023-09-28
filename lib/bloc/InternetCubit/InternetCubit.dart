@@ -1,19 +1,20 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:task/bloc/InternetCubit/InternetState.dart';
 
-enum InternetState{ initialState, connect,disconnect}
+
 
 class InternetCubit extends Cubit<InternetState>{
   StreamSubscription? connectCheck ;
   Connectivity _connectConnectivity = Connectivity();
-  InternetCubit() : super(InternetState.initialState){
+  InternetCubit() : super(DisconnectedState()){
     connectCheck = _connectConnectivity.onConnectivityChanged.listen((result) {
       if(result == ConnectivityResult.mobile || result == ConnectivityResult.wifi){
-        emit(InternetState.connect);
+        emit(ConnectedState());
       }
       else{
-        emit(InternetState.disconnect);
+        emit(DisconnectedState());
       }
 
     });
