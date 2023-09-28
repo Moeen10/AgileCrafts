@@ -22,101 +22,123 @@ class _LoginState extends State<Login> {
 
     return Scaffold(
       backgroundColor: Color(0xffffffff),
-      body: BlocBuilder<LoginCubit, LoginState>(builder: (context, state) {
-        if (state is LoadingState) {
-          return Center(child: CircularProgressIndicator());
-        } else if (state is SuccessState) {
-              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Home(),), (route) => false);
-        } else if (state is ErrorState) {
-          return Center(child: Text("Login Failed"));
-          // Show an error message to the user
-        }
+      body: BlocListener<LoginCubit,LoginState>(
+        listener: (context, state) {
+          if(state is SuccessState){
+            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Home(),), (route) => false);
+          }
+        },
+        child: BlocBuilder<LoginCubit, LoginState>(builder: (context, state) {
+          if (state is LoadingState) {
+            return Center(child: CircularProgressIndicator());
+          }
 
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Center(
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Align(
-                      alignment: AlignmentDirectional.topStart,
-                      child: Text(
-                        "Get Started!!!",
-                        style: Theme.of(context).textTheme.headlineLarge,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
+          else if (state is SuccessState) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Login Successfully'),
+                  duration: Duration(seconds: 2), // Adjust the duration as needed
+                ),
+              );
+            }
+            );
 
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10.0),
-                      child: Image(
-                        image: AssetImage("assets/images/rename.jpg"),
-                        height: 250,
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    TextField(
-                      decoration: InputDecoration(labelText: 'Username'),
-                      controller: username,
-                    ),
+          }
+          else if (state is ErrorState) {
+            return Center(child: Text("Login Failed"));
+            // Show an error message to the user
+          }
 
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    TextField(
-                      decoration: InputDecoration(labelText: 'Password'),
-                      obscureText: true,
-                      controller: password,
-                    ),
-
-                    // --------------------  Login Button   ---------------------------------
-
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    ElevatedButton(
-                        onPressed: () {
-                          final data = password.text;
-                          final data2 = username.text;
-                          print(data);
-                          print(data2);
-                          // BlocProvider.of<YourCubit>(context).updateData(data);
-                          BlocProvider.of<LoginCubit>(context)
-                              .loginfun(data, data2);
-
-                        },
-                        child: Text('Submit')),
-
-                    const SizedBox(
-                      height: 15,
-                    ),
-
-                    TextButton(
-                        onPressed: () {},
-                        child: const Text("Forgot password?")),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          "Don't have an account?",
-                          style: TextStyle(fontWeight: FontWeight.bold),
+          return SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Center(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Align(
+                        alignment: AlignmentDirectional.topStart,
+                        child: Text(
+                          "Get Started!!!",
+                          style: Theme.of(context).textTheme.headlineLarge,
                         ),
-                        TextButton(
-                            onPressed: () {},
-                            child: const Text("create account")),
-                      ],
-                    )
-                  ],
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10.0),
+                        child: Image(
+                          image: AssetImage("assets/images/rename.jpg"),
+                          height: 250,
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      TextField(
+                        decoration: InputDecoration(labelText: 'Username'),
+                        controller: username,
+                      ),
+
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      TextField(
+                        decoration: InputDecoration(labelText: 'Password'),
+                        obscureText: true,
+                        controller: password,
+                      ),
+
+                      // --------------------  Login Button   ---------------------------------
+
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      ElevatedButton(
+                          onPressed: () async{
+                            final data = password.text;
+                            final data2 = username.text;
+                            print(data);
+                            print(data2);
+                            // BlocProvider.of<YourCubit>(context).updateData(data);
+                            String check = await BlocProvider.of<LoginCubit>(context)
+                                .loginfun(data, data2);
+                            if(check == "Authentication failed"){
+                              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Home(),), (route) => false);
+                            }
+
+                          },
+                          child: Text('Submit')),
+
+                      const SizedBox(
+                        height: 15,
+                      ),
+
+                      TextButton(
+                          onPressed: () {},
+                          child: const Text("Forgot password?")),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            "Don't have an account?",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          TextButton(
+                              onPressed: () {},
+                              child: const Text("create account")),
+                        ],
+                      )
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        );
-      }),
+          );
+        }),
+      ),
     );
   }
 }

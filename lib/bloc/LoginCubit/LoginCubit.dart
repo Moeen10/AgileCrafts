@@ -7,7 +7,7 @@ class LoginCubit extends Cubit<LoginState> {
 
   LoginCubit(this.authRepository) : super(InitState());
 
-  void loginfun(String username, String password) async {
+  Future<String> loginfun(String username, String password) async {
     try {
       final String name = username;
       final String pass = password;
@@ -17,13 +17,15 @@ class LoginCubit extends Cubit<LoginState> {
       emit(LoadingState());
       if (result != "Authentication failed") {
         emit(SuccessState(result));
+        return "Authentication Done";
       } else {
         emit(ErrorState(result));
+        return "Authentication failed";
       }
 
       // Depending on the result, emit the appropriate state
     } catch (e) {
-      // emit(LoginFailedState('An error occurred: $e')); /
+      return e.toString();
     }
   }
 }

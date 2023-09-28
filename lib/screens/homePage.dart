@@ -43,6 +43,9 @@ class _HomeState extends State<Home> {
         ),
         body: Column(
           children: [
+
+
+
             BlocBuilder<PostCubit, PostState>(
               builder: (context, state) {
                 if (state is GetDataState) {
