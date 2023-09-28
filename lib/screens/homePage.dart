@@ -73,37 +73,10 @@ class _HomeState extends State<Home> {
                     child: BlocBuilder<PostCubit, PostState>(
                       builder: (context, state) {
                         if (state is GetDataState) {
-
-
-
-
-                          // print("&&&&&&&&&&&&&&&&&&");
-                          // print( state.posts[index].id);
-                          // final data = Product(description: state.posts[index].description,id: state.posts[index].id,isAvailable: state.posts[index].isAvailable,name: state.posts[index].name,tenantId:state.posts[index].tenantId );
-                          // final box = Boxes.getData();
-                          // box.add(data);
-                          // data.save();
-
-                          // print(box.values.first.id);
-                          List<Product> productList = [];
-                          for(Product i in  state.posts ){
-
-                            productList.add(Product(
-                              description: i.description,
-                              id: i.id,
-                              isAvailable: i.isAvailable,
-                              name: i.name,
-                              tenantId: i.tenantId,
-                            ));
-                          }
-
                           final box = Boxes.getData();
-                          box.addAll(productList);
 
                           if (box.length >= 5) {
                             print("????????????     ${box.length}      ////////////////////////");
-                          ;
-                            // Add other properties as needed
                           }
 
                           return ValueListenableBuilder<Box<Product>>(
@@ -117,46 +90,22 @@ class _HomeState extends State<Home> {
                                 return ListView.builder(
                                   itemCount: box.length,
                                   itemBuilder: (context, index) {
-                                  return    ListTile(
-                                    title: Text(data[index].name.toString()),
-                                    leading: Text(data[index].id.toString()),
-                                    trailing: IconButton(
-                                      onPressed: () {
-                                        Product singleProduct = state.posts[index];
-                                        edit = !edit;
-                                        BlocProvider.of<EditCubit>(context)
-                                            .editPermission(edit, singleProduct);
-                                      },
-                                      icon: Icon(Icons.edit),
-                                    ),
-                                  );
-                                },);
+                                    return    ListTile(
+                                      title: Text(data[index].name.toString()),
+                                      leading: Text(data[index].id.toString()),
+                                      trailing: IconButton(
+                                        onPressed: () {
+                                          Product singleProduct = state.posts[index];
+                                          edit = !edit;
+                                          BlocProvider.of<EditCubit>(context)
+                                              .editPermission(edit, singleProduct);
+                                        },
+                                        icon: Icon(Icons.edit),
+                                      ),
+                                    );
+                                  },);
                               }
                           );
-
-
-                            ListView.builder(
-                            itemCount: state.posts.length,
-
-                            itemBuilder: (context, index) {
-
-                              return ListTile(
-                                title: Text(state.posts[index].name.toString()),
-                                leading: Text(state.posts[index].id.toString()),
-                                trailing: IconButton(
-                                  onPressed: () {
-                                    Product singleProduct = state.posts[index];
-                                    edit = !edit;
-                                    BlocProvider.of<EditCubit>(context)
-                                        .editPermission(edit, singleProduct);
-                                  },
-                                  icon: Icon(Icons.edit),
-                                ),
-                              );
-                            },
-                          );
-
-
 
                         } else if (state is LoadingState) {
                           return Center(
@@ -185,43 +134,149 @@ class _HomeState extends State<Home> {
 
 
 
-                BlocConsumer<EditCubit,EditState>(builder: (context, state) {
-                  if(state is DoEditState){
+                  BlocConsumer<EditCubit,EditState>(builder: (context, state) {
+                    if(state is DoEditState){
 
-                    return
-                      AlertDialog(
+                      return
+                        AlertDialog(
 
-                        title: Center(child: Text(state.singleProduct.name.toString())),
-                        content: Text("Description : - ${state.singleProduct.description.toString()}"),
-                        actions: <Widget>[
+                          title: Center(child: Text(state.singleProduct.name.toString())),
+                          content: Text("Description : - ${state.singleProduct.description.toString()}"),
+                          actions: <Widget>[
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Name"),
+                                TextField(onChanged: (value) {
+                                  setState(() {
+                                    EditData.name = value;
+                                  });
+                                },),
+                                Text("Description"),
+                                TextField(
+                                  onChanged: (value) {
+                                    setState(() {
+                                      EditData.description = value;
+                                    });
+                                  },
+                                ),
+                                Text("Available"),
+                                Column(
+                                  children: <Widget>[
+                                    ListTile(
+                                      title: Text('Select True'),
+                                      leading: Radio(
+                                        value: true,
+                                        groupValue: EditData.isAvailable,
+                                        onChanged: (bool? value) {
+                                          setState(() {
+                                            EditData.isAvailable = value ?? false;
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                    ListTile(
+                                      title: Text('Select False'),
+                                      leading: Radio(
+                                        value: false,
+                                        groupValue: EditData.isAvailable,
+                                        onChanged: (bool? value) {
+                                          setState(() {
+                                            EditData.isAvailable = value ?? false;
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Text('Selected: ${EditData.isAvailable}'),
+
+
+                              ],
+                            ),
+                            Container(
+                              margin: EdgeInsets.all(8.0),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                ElevatedButton(onPressed: ()async{
+                                  BlocProvider.of<EditCubit>(context).edit(EditData,state.singleProduct.id as int);
+
+                                }, child: Text("Submit")),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    edit = !edit;
+                                    BlocProvider.of<EditCubit>(context).editPermission(edit,state.singleProduct as Product);
+
+                                  },
+                                  child: Text('Close'),
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
+
+                    }
+
+                    if (state is NoEditState)
+                    {
+                      return Container();
+                    }
+
+                    return Container();
+                  }, listener: (context, state) {
+                    if(state is DoneEditState){
+
+                      BlocProvider.of<PostCubit>(context).fetchPosts();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Edit Successfully"),
+                          backgroundColor: Colors.blue,
+                        ),
+                      );
+                    }
+                  },),
+
+                  BlocConsumer<AddCubit,AddState>(builder: (context, state) {
+
+                    if(state is AddInitialStateState){
+                      return Container();
+                    }
+                    if(state is OpenAddState){
+                      return AlertDialog(
+                        title: Text("Add Product"),
+                        actions: [
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text("Name"),
-                              TextField(onChanged: (value) {
-                                setState(() {
-                                  EditData.name = value;
-                                });
-                              },),
+                              TextField(
+                                onChanged: (value) {
+                                  setState(() {
+                                    AddData.name = value;
+                                  });
+                                },
+                              ),
                               Text("Description"),
                               TextField(
                                 onChanged: (value) {
                                   setState(() {
-                                    EditData.description = value;
+                                    AddData.description = value;
                                   });
                                 },
                               ),
-                              Text("Available"),
+                              Text("Is Available"),
                               Column(
                                 children: <Widget>[
                                   ListTile(
                                     title: Text('Select True'),
                                     leading: Radio(
                                       value: true,
-                                      groupValue: EditData.isAvailable,
+                                      groupValue: AddData.isAvailable,
                                       onChanged: (bool? value) {
                                         setState(() {
-                                          EditData.isAvailable = value ?? false;
+                                          AddData.isAvailable = value ?? false;
                                         });
                                       },
                                     ),
@@ -230,171 +285,65 @@ class _HomeState extends State<Home> {
                                     title: Text('Select False'),
                                     leading: Radio(
                                       value: false,
-                                      groupValue: EditData.isAvailable,
+                                      groupValue: AddData.isAvailable,
                                       onChanged: (bool? value) {
                                         setState(() {
-                                          EditData.isAvailable = value ?? false;
+                                          AddData.isAvailable = value ?? false;
                                         });
                                       },
                                     ),
                                   ),
                                 ],
                               ),
-                              Text('Selected: ${EditData.isAvailable}'),
-
-
-                            ],
-                          ),
-                          Container(
-                            margin: EdgeInsets.all(8.0),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              ElevatedButton(onPressed: ()async{
-                                BlocProvider.of<EditCubit>(context).edit(EditData,state.singleProduct.id as int);
-
-                              }, child: Text("Submit")),
-                              ElevatedButton(
-                                onPressed: () {
-                                  edit = !edit;
-                                  BlocProvider.of<EditCubit>(context).editPermission(edit,state.singleProduct as Product);
-
-                                },
-                                child: Text('Close'),
-                              ),
+                              Text('Selected: ${AddData.isAvailable}'),
+                              SizedBox(height: 20,),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: (){
+                                      // print('Name: ${AddData.name}');
+                                      // print('Description: ${AddData.description}');
+                                      // print('Is Available: ${AddData.isAvailable}');
+                                      BlocProvider.of<AddCubit>(context).productAdd(AddData);
+                                    },
+                                    child: Text("Submit"),
+                                  ),
+                                  ElevatedButton(onPressed: (){
+                                    BlocProvider.of<AddCubit>(context).closeScreen();
+                                  }, child: Text("Close")),
+                                ],
+                              )
                             ],
                           ),
                         ],
                       );
-
-                  }
-
-                  if (state is NoEditState)
-                  {
+                    }
+                    if(state is CancelAddState ){
+                      return Container();
+                    }
+                    if(state is CancelAddState){
+                      return Container();
+                    }
                     return Container();
-                  }
-
-                  return Container();
-                }, listener: (context, state) {
-                  if(state is DoneEditState){
-
-                    BlocProvider.of<PostCubit>(context).fetchPosts();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text("Edit Successfully"),
-                        backgroundColor: Colors.blue,
-                      ),
-                    );
-                  }
-                },),
-
-                  BlocConsumer<AddCubit,AddState>(builder: (context, state) {
-
-                   if(state is AddInitialStateState){
-                     return Container();
-                   }
-                   if(state is OpenAddState){
-                     return AlertDialog(
-                       title: Text("Add Product"),
-                       actions: [
-                         Column(
-                           crossAxisAlignment: CrossAxisAlignment.start,
-                           children: [
-                             Text("Name"),
-                             TextField(
-                               onChanged: (value) {
-                                 setState(() {
-                                   AddData.name = value;
-                                 });
-                               },
-                             ),
-                             Text("Description"),
-                             TextField(
-                               onChanged: (value) {
-                                 setState(() {
-                                   AddData.description = value;
-                                 });
-                               },
-                             ),
-                             Text("Is Available"),
-                             Column(
-                               children: <Widget>[
-                                 ListTile(
-                                   title: Text('Select True'),
-                                   leading: Radio(
-                                     value: true,
-                                     groupValue: AddData.isAvailable,
-                                     onChanged: (bool? value) {
-                                       setState(() {
-                                         AddData.isAvailable = value ?? false;
-                                       });
-                                     },
-                                   ),
-                                 ),
-                                 ListTile(
-                                   title: Text('Select False'),
-                                   leading: Radio(
-                                     value: false,
-                                     groupValue: AddData.isAvailable,
-                                     onChanged: (bool? value) {
-                                       setState(() {
-                                         AddData.isAvailable = value ?? false;
-                                       });
-                                     },
-                                   ),
-                                 ),
-                               ],
-                             ),
-                             Text('Selected: ${AddData.isAvailable}'),
-                             SizedBox(height: 20,),
-                             Row(
-                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                               children: [
-                                 ElevatedButton(
-                                   onPressed: (){
-                                     // print('Name: ${AddData.name}');
-                                     // print('Description: ${AddData.description}');
-                                     // print('Is Available: ${AddData.isAvailable}');
-                                     BlocProvider.of<AddCubit>(context).productAdd(AddData);
-                                   },
-                                   child: Text("Submit"),
-                                 ),
-                                 ElevatedButton(onPressed: (){
-                                   BlocProvider.of<AddCubit>(context).closeScreen();
-                                 }, child: Text("Close")),
-                               ],
-                             )
-                           ],
-                         ),
-                       ],
-                     );
-                   }
-                   if(state is CancelAddState ){
-                     return Container();
-                   }
-                   if(state is CancelAddState){
-                     return Container();
-                   }
-                   return Container();
 
 
 
-                 },
-                     listener: (context, state) {
-                       if (state is DoneAddState) {
-                         ScaffoldMessenger.of(context).showSnackBar(
-                           SnackBar(
-                             content: Text("Added Successfully"),
-                             backgroundColor: Colors.blue,
-                           ),
-                         );
+                  },
+                    listener: (context, state) {
+                      if (state is DoneAddState) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text("Added Successfully"),
+                            backgroundColor: Colors.blue,
+                          ),
+                        );
 
-                         BlocProvider.of<PostCubit>(context).fetchPosts();
+                        BlocProvider.of<PostCubit>(context).fetchPosts();
 
-                       }
-                     },
-                 )
+                      }
+                    },
+                  )
 
                 ],
               );
@@ -439,5 +388,4 @@ class _HomeState extends State<Home> {
 class Boxes {
   static Box<Product> getData() => Hive.box<Product>("products");
 }
-
 

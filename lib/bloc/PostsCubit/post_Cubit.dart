@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:task/bloc/PostsCubit/state_cubit.dart';
 import 'package:task/models/product_model.dart';
 import 'package:task/repository/getRepository/post_repository.dart';
@@ -48,8 +49,19 @@ class PostCubit extends Cubit<PostState> {
 
       if (response.statusCode == 200) {
         final responseBody = json.decode(response.body);
-        List<dynamic> postsData =
-            responseBody; // Assuming the response is a List
+        List<dynamic> postsData = responseBody; // Assuming the response is a List
+        final box = await Hive.openBox<Product>("products");
+        await box.clear();
+
+        for (var data in responseBody) {
+          box.add(Product(
+            tenantId: data['tenantId'],
+            name: data['name'],
+            description: data['description'],
+            isAvailable: data['isAvailable'],
+            id: data['id'],
+          ));
+        }
         return postsData.map((postData) => Product.fromJson(postData)).toList();
       } else {
         // Request failed
