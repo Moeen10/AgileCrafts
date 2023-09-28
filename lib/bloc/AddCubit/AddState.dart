@@ -5,6 +5,7 @@ class AddLoadingState extends AddState{}
 class DoneAddState extends AddState{}
 
 class CancelAddState extends AddState{}
+class OfflineOpenAddState extends AddState{}
 
 class ErrorAddState extends AddState{
   final String errorMessage;

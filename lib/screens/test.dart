@@ -1,12 +1,14 @@
-import 'package:flutter/material.dart';
-
-class OK extends StatelessWidget {
-  const OK({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text("asaf"),
-    );
-  }
-}
+final product = Product(
+  name: name,
+  description: description,
+  isAvailable: isAvailable,
+);
+// Add 'product' to Hive
+Hive.box<Product>("products").add(product);
+// Close the dialog
+Navigator.of(context).pop();
+},
+onClose: () {
+// Close the dialog
+Navigator.of(context).pop();
+},

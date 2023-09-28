@@ -71,6 +71,7 @@ class PostCubit extends Cubit<PostState> {
             'Failed to fetch data'); // Add an exception to indicate the failure
       }
     } catch (e) {
+
       emit(NotGetDataState());
       print('Error: $e');
       throw e;

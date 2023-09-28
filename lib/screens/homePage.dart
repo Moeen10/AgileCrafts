@@ -24,7 +24,11 @@ class _HomeState extends State<Home> {
   bool edit = false;
   bool add = false;
   MyFormData AddData = MyFormData();
+  MyFormData AddDataOffline = MyFormData();
+
   MyFormData EditData = MyFormData();
+  MyFormData OfflineEditData = MyFormData();
+  final ValueNotifier<bool> hiveDataChangedNotifier = ValueNotifier<bool>(false);
 
   @override
   Widget build(BuildContext context) {
@@ -51,59 +55,140 @@ class _HomeState extends State<Home> {
               return Column(
                 children: [
                   Text("Disconnected"),
+
                   ElevatedButton(
                     onPressed: () {
-                      add = !add;
-                      print(add);
-                      
+                      setState(() {
+                        add = !add;
+                        print(add);
+                        if (add) {
+                          BlocProvider.of<AddCubit>(context).OfflineAddProject(add);
+                          AlertDialog(
+                            title: Text("Add Product"),
+                            actions: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("Name"),
+                                  TextField(
+                                    onChanged: (value) {
+                                      setState(() {
+                                        AddDataOffline.name = value;
+                                      });
+                                    },
+                                  ),
+                                  Text("Description"),
+                                  TextField(
+                                    onChanged: (value) {
+                                      setState(() {
+                                        AddDataOffline.description = value;
+                                      });
+                                    },
+                                  ),
+                                  Text("Is Available"),
+                                  Column(
+                                    children: <Widget>[
+                                      ListTile(
+
+
+
+                                        title: Text('Select True'),
+                                        leading: Radio(
+                                          value: true,
+                                          groupValue: AddDataOffline.isAvailable,
+                                          onChanged: (bool? value) {
+                                            setState(() {
+                                              AddDataOffline.isAvailable = value ?? false;
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                      ListTile(
+                                        title: Text('Select False'),
+                                        leading: Radio(
+                                          value: false,
+                                          groupValue: AddDataOffline.isAvailable,
+                                          onChanged: (bool? value) {
+                                            setState(() {
+                                              AddDataOffline.isAvailable = value ?? false;
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Text('Selected: ${AddDataOffline.isAvailable}'),
+                                  SizedBox(height: 20,),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      ElevatedButton(
+                                        onPressed: (){
+                                          Product product = Product(
+                                            tenantId: 20,
+                                            name: AddDataOffline.name,
+                                            description: AddDataOffline.description,
+                                            isAvailable: AddDataOffline.isAvailable,
+                                            id:1
+                                          );
+                                          print("{}{}{}{}");
+                                          print(product.name);
+                                          print(product.id);
+                                          print(product.description);
+
+                                          // Add 'product' to Hive
+                                          Hive.box<Product>("products").add(product);
+
+                                        },
+                                        child: Text("Submit"),
+                                      ),
+                                      ElevatedButton(onPressed: (){
+                                        BlocProvider.of<AddCubit>(context).closeScreen();
+                                      }, child: Text("Close")),
+                                    ],
+                                  ),
+
+                                ],
+                              )
+                            ],
+                          );
+                        }
+                      });
                     },
                     child: Text("ADD"),
                   ),
+
+                  // =====================  offline data fetch =======================
                   Expanded(
                     child: ValueListenableBuilder<Box<Product>>(
-                        valueListenable: Boxes.getData().listenable(),
-                        builder: (context,box,_){
-                          var data = box.values.toList().cast<Product>();
+                      valueListenable: Boxes.getData().listenable(),
+                      builder: (context, box, _) {
+                        var data = box.values.toList().cast<Product>();
 
-
-
-
-                          return ListView.builder(
-                            itemCount: box.length,
-                            itemBuilder: (context, index) {
-                              return    ListTile(
-                                title: Text(data[index].name.toString()),
-                                leading: Text(data[index].id.toString()),
-                                trailing: IconButton(
-                                  onPressed: () {
-                                    edit = !edit;
-                                  },
-                                  icon: Icon(Icons.edit),
-                                ),
-                              );
-                            },);
-                        }
+                        return ListView.builder(
+                          itemCount: box.length,
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                              title: Text(data[index].name.toString()),
+                              leading: Text(data[index].id.toString()),
+                              trailing: IconButton(
+                                onPressed: () {
+                                  Product singleProduct =data[index];
+                                  edit = !edit;
+                                  BlocProvider.of<EditCubit>(context)
+                                      .OfflineEditPermission(edit, singleProduct);
+                                },
+                                icon: Icon(Icons.edit),
+                              ),
+                            );
+                          },
+                        );
+                      },
                     ),
                   ),
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                   BlocConsumer<EditCubit,EditState>(builder: (context, state) {
-                    if(state is DoEditState){
+                    if(state is OfflineDoEditState){
 
                       return
                         AlertDialog(
@@ -117,14 +202,14 @@ class _HomeState extends State<Home> {
                                 Text("Name"),
                                 TextField(onChanged: (value) {
                                   setState(() {
-                                    EditData.name = value;
+                                    OfflineEditData.name = value;
                                   });
                                 },),
                                 Text("Description"),
                                 TextField(
                                   onChanged: (value) {
                                     setState(() {
-                                      EditData.description = value;
+                                      OfflineEditData.description = value;
                                     });
                                   },
                                 ),
@@ -135,10 +220,10 @@ class _HomeState extends State<Home> {
                                       title: Text('Select True'),
                                       leading: Radio(
                                         value: true,
-                                        groupValue: EditData.isAvailable,
+                                        groupValue: OfflineEditData.isAvailable,
                                         onChanged: (bool? value) {
                                           setState(() {
-                                            EditData.isAvailable = value ?? false;
+                                            OfflineEditData.isAvailable = value ?? false;
                                           });
                                         },
                                       ),
@@ -147,17 +232,17 @@ class _HomeState extends State<Home> {
                                       title: Text('Select False'),
                                       leading: Radio(
                                         value: false,
-                                        groupValue: EditData.isAvailable,
+                                        groupValue: OfflineEditData.isAvailable,
                                         onChanged: (bool? value) {
                                           setState(() {
-                                            EditData.isAvailable = value ?? false;
+                                            OfflineEditData.isAvailable = value ?? false;
                                           });
                                         },
                                       ),
                                     ),
                                   ],
                                 ),
-                                Text('Selected: ${EditData.isAvailable}'),
+                                Text('Selected: ${OfflineEditData.isAvailable}'),
 
 
                               ],
@@ -169,7 +254,7 @@ class _HomeState extends State<Home> {
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
                                 ElevatedButton(onPressed: ()async{
-                                  BlocProvider.of<EditCubit>(context).edit(EditData,state.singleProduct.id as int);
+                                  OffEdit(OfflineEditData,state.singleProduct.id as int);
 
                                 }, child: Text("Submit")),
                                 ElevatedButton(
@@ -191,12 +276,14 @@ class _HomeState extends State<Home> {
                     {
                       return Container();
                     }
+                    else if(state is OfflineDoEditState){
+                       Hive.openBox<Product>("products");
+                    }
 
                     return Container();
                   }, listener: (context, state) {
                     if(state is DoneEditState){
 
-                      BlocProvider.of<PostCubit>(context).fetchPosts();
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text("Edit Successfully"),
@@ -211,7 +298,7 @@ class _HomeState extends State<Home> {
                     if(state is AddInitialStateState){
                       return Container();
                     }
-                    if(state is OpenAddState){
+                    if(state is OfflineOpenAddState){
                       return AlertDialog(
                         title: Text("Add Product"),
                         actions: [
@@ -306,15 +393,14 @@ class _HomeState extends State<Home> {
                             backgroundColor: Colors.blue,
                           ),
                         );
-
-                        BlocProvider.of<PostCubit>(context).fetchPosts();
-
                       }
                     },
-                  )
+                  ),
 
+                  // BlocConsumer for add and edit state can go here if needed
                 ],
               );
+
             } 
             
             
@@ -638,11 +724,23 @@ class _HomeState extends State<Home> {
                 ),
               );
             }
+            if (state is DisconnectedState) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text("Internet Disonnected"),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
           },
         ),
       ),
     );
   }
+
+Future<void> editOffline(Product editedProduct )async{
+
+}
 
 
   Future<void> _showDialog()async{
@@ -655,6 +753,49 @@ class _HomeState extends State<Home> {
         }
     );
   }
+
+
+
+  void OffEdit(MyFormData EditData,int idd) async {
+    final box = Hive.box<Product>("products");
+    final int productId = idd ?? 0; // Replace 0 with a default value if needed
+
+    // Fetch the existing product from the Hive box
+    final Product existingProduct = box.get(productId) as Product;
+
+    if (existingProduct != null) {
+      // Update the existing product with the edited values
+      existingProduct.name = EditData.name;
+      existingProduct.description = EditData.description;
+      existingProduct.isAvailable = EditData.isAvailable;
+
+      // Replace the old product with the updated product in the Hive box
+      box.put(productId, existingProduct);
+      // final products = box.values.toList().cast<Product>();
+      // await box.clear(); // Clear the previous data
+      // await box.addAll(products);
+      hiveDataChangedNotifier.value = true;
+      print("HHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
+      for (int index = 0; index < box.length; index++) {
+        final product = box.getAt(index) as Product; // Assuming Product is the type stored in the box
+
+        if (product.id == productId) {
+          print(":::::::::::::::::::::::::");
+          print(product.id);
+          print(product.name);
+          break; // Stop searching when the updated product is found
+        }
+      }
+
+
+    } else {
+      // Handle the case where the product with the specified ID is not found
+      print("Product with ID $productId not found in Hive");
+    }
+  }
+
+
+
 
 }
 

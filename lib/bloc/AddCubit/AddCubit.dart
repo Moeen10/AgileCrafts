@@ -21,6 +21,16 @@ class AddCubit extends Cubit<AddState> {
     } else {}
   }
 
+
+  void OfflineAddProject(bool openOrClose) {
+    if (openOrClose) {
+      emit(OfflineOpenAddState());
+    }
+    if (!openOrClose) {
+      emit(CancelAddState());
+    } else {}
+  }
+
   void productAdd(project) async {
     final url = Uri.parse(
         'https://stg-zero.propertyproplus.com.au/api/services/app/ProductSync/CreateOrEdit');
