@@ -98,26 +98,73 @@ class _HomeState extends State<Home> {
                         AlertDialog(
 
                           title: Center(child: Text(state.singleProduct.name.toString())),
-                          content: Text(state.singleProduct.description.toString()),
+                          content: Text("Description : - ${state.singleProduct.description.toString()}"),
                           actions: <Widget>[
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text("Name"),
-                                TextField(),
+                                TextField(onChanged: (value) {
+                                  setState(() {
+                                    EditData.name = value;
+                                  });
+                                },),
                                 Text("Description"),
-                                TextField(),
+                                TextField(
+                                  onChanged: (value) {
+                                    setState(() {
+                                      EditData.description = value;
+                                    });
+                                  },
+                                ),
                                 Text("Available"),
+                                Column(
+                                  children: <Widget>[
+                                    ListTile(
+                                      title: Text('Select True'),
+                                      leading: Radio(
+                                        value: true,
+                                        groupValue: EditData.isAvailable,
+                                        onChanged: (bool? value) {
+                                          setState(() {
+                                            EditData.isAvailable = value ?? false;
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                    ListTile(
+                                      title: Text('Select False'),
+                                      leading: Radio(
+                                        value: false,
+                                        groupValue: EditData.isAvailable,
+                                        onChanged: (bool? value) {
+                                          setState(() {
+                                            EditData.isAvailable = value ?? false;
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Text('Selected: ${EditData.isAvailable}'),
+
 
                               ],
                             ),
                             Container(
-                             margin: EdgeInsets.all(16.0),
+                             margin: EdgeInsets.all(8.0),
                              ),
                            Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
-                                ElevatedButton(onPressed: (){}, child: Text("Submit")),
+                                ElevatedButton(onPressed: (){
+                                  BlocProvider.of<EditCubit>(context).edit(EditData,state.singleProduct.id as int);
+                                  Future<void> delayThreeSeconds() async {
+                                    await Future.delayed(Duration(seconds: 3));
+                                    print("Delay completed after 3 seconds");
+                                  }
+                                  BlocProvider.of<PostCubit>(context).fetchPosts();
+                                }, child: Text("Submit")),
                                 ElevatedButton(
                                   onPressed: () {
                                     edit = !edit;
@@ -146,7 +193,7 @@ class _HomeState extends State<Home> {
                   }
                   if(state is OpenAddState){
                     return AlertDialog(
-                     title: Text("Add Device"),
+                     title: Text("Add Product"),
                      actions: [
                        Column(
                          crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,12 +254,16 @@ class _HomeState extends State<Home> {
                                    // print('Description: ${AddData.description}');
                                    // print('Is Available: ${AddData.isAvailable}');
                                    BlocProvider.of<AddCubit>(context).productAdd(AddData);
+                                   Future<void> delayThreeSeconds() async {
+                                     await Future.delayed(Duration(seconds: 3));
+                                     print("Delay completed after 3 seconds");
+                                   }
+                                   BlocProvider.of<PostCubit>(context).fetchPosts();
                                  },
                                  child: Text("Submit"),
                                ),
                                ElevatedButton(onPressed: (){
-                                 // Reset the form or perform other actions
-                                 AddData = MyFormData(); // Clear the form data
+                                 BlocProvider.of<AddCubit>(context).closeScreen();
                                }, child: Text("Close")),
                              ],
                            )
@@ -225,7 +276,6 @@ class _HomeState extends State<Home> {
                     return Container();
                   }
                   if (state is DoneAddState) {
-                    // Show a Snackbar if the state is DoneAddState
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -233,7 +283,12 @@ class _HomeState extends State<Home> {
                           duration: Duration(seconds: 2), // Adjust the duration as needed
                         ),
                       );
-                    });
+                    }
+                    );
+
+                  }
+                  if(state is CancelAddState){
+                    return Container();
                   }
                   return Container();
 

@@ -8,3 +8,9 @@ class DoEditState extends EditState {
 }
 
 class NoEditState extends EditState {}
+class ErrorEditState extends EditState {
+  final String error;
+  ErrorEditState(this.error);
+}
+class DoneEditState extends EditState {}
+

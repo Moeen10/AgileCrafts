@@ -51,6 +51,11 @@ class AddCubit extends Cubit<AddState> {
     }
   }
 
+  void closeScreen()
+  {
+    emit(CancelAddState());
+  }
+
   // void productAdd ( project ) async{
   //   print("Moeen");
   //  print(project.isAvailable);

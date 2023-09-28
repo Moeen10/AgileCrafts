@@ -13,3 +13,4 @@ class ErrorMesageState extends PostState {
   final String error;
   ErrorMesageState(this.error);
 }
+
