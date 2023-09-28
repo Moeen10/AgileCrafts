@@ -86,6 +86,13 @@ class CustomButton extends StatelessWidget {
 }
 
 
-class  accessToken {
+class AccessToken {
+  static String tokenValue = "";
+}
 
+
+class MyFormData {
+  String name = '';
+  String description = '';
+  bool isAvailable = false;
 }

@@ -1,4 +1,4 @@
-abstract class ProductState();
+abstract class ProductState{}
 
 class ProductLoading extends ProductState{}
 class ProductGet extends ProductState{}
