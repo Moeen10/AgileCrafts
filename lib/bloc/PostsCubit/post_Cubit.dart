@@ -64,12 +64,14 @@ class PostCubit extends Cubit<PostState> {
         }
         return postsData.map((postData) => Product.fromJson(postData)).toList();
       } else {
+        emit(NotGetDataState());
         // Request failed
         print('Request failed with status: ${response.statusCode}');
         throw Exception(
             'Failed to fetch data'); // Add an exception to indicate the failure
       }
     } catch (e) {
+      emit(NotGetDataState());
       print('Error: $e');
       throw e;
     }

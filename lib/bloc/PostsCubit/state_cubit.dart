@@ -9,6 +9,9 @@ class GetDataState extends PostState {
   GetDataState(this.posts);
 }
 
+class NotGetDataState extends PostState {
+}
+
 class ErrorMesageState extends PostState {
   final String error;
   ErrorMesageState(this.error);
