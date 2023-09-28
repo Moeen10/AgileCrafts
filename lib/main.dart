@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:task/bloc/LoginCubit/LoginCubit.dart';
 import 'package:task/bloc/PostsCubit/post_Cubit.dart';
 import 'package:task/screens/login.dart';
 
 import 'repository/authRepository/authRepo.dart';
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  var directory = await getApplicationDocumentsDirectory();
+  Hive.init(directory.path);
   runApp(const MyApp());
 }
 

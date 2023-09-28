@@ -26,11 +26,7 @@ class _LoginState extends State<Login> {
         if (state is LoadingState) {
           return Center(child: CircularProgressIndicator());
         } else if (state is SuccessState) {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => Home(),
-              ));
+              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => Home(),), (route) => false);
         } else if (state is ErrorState) {
           return Center(child: Text("Login Failed"));
           // Show an error message to the user
@@ -91,6 +87,7 @@ class _LoginState extends State<Login> {
                           // BlocProvider.of<YourCubit>(context).updateData(data);
                           BlocProvider.of<LoginCubit>(context)
                               .loginfun(data, data2);
+
                         },
                         child: Text('Submit')),
 
